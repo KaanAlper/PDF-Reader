@@ -11,11 +11,13 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+      background-color: #f5f5f5;
     }
     canvas {
       border: 1px solid #ccc;
       max-width: 100%;
       height: auto;
+      margin-bottom: 20px;
     }
     .controls {
       margin: 10px;
@@ -27,6 +29,15 @@
     button {
       padding: 8px 12px;
       font-size: 16px;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+      background-color: #007bff;
+      color: white;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background-color: #0056b3;
     }
   </style>
 </head>
@@ -42,15 +53,20 @@
 
   <canvas id="pdf-canvas"></canvas>
 
-  <script src="pdf.js"></script>
+  <!-- PDF.js CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.12.313/pdf.min.js"></script>
   <script>
-    const url = 'pdfs/example.pdf'; // PDF dosyanın yolu
+    // PDF.js worker yolunu belirtmek
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.12.313/pdf.worker.min.js';
+
+    // PDF dosyasının yolu (GitHub raw linki önerilir)
+    const url = 'https://raw.githubusercontent.com/kullaniciadi/repoadi/main/pdfs/example.pdf';
 
     let pdfDoc = null,
         pageNum = 1,
         pageIsRendering = false,
         pageNumPending = null,
-        scale = 1.2;  // Zoom
+        scale = 1.2;
 
     const canvas = document.getElementById('pdf-canvas');
     const ctx = canvas.getContext('2d');
@@ -60,8 +76,12 @@
       pdfDoc = pdf;
       document.getElementById('page-count').textContent = pdf.numPages;
       renderPage(pageNum);
+    }).catch(err => {
+      console.error('PDF yüklenemedi: ', err);
+      alert('PDF yüklenemedi, linki ve yolu kontrol edin.');
     });
 
+    // Sayfa render
     function renderPage(num) {
       pageIsRendering = true;
       pdfDoc.getPage(num).then(page => {
@@ -93,6 +113,7 @@
       }
     }
 
+    // Kontroller
     function showPrevPage() {
       if (pageNum <= 1) return;
       pageNum--;
@@ -116,6 +137,7 @@
       queueRenderPage(pageNum);
     }
 
+    // Event listenerlar
     document.getElementById('prev').addEventListener('click', showPrevPage);
     document.getElementById('next').addEventListener('click', showNextPage);
     document.getElementById('zoom-in').addEventListener('click', zoomIn);
